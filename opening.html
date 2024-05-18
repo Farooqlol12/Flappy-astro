@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Astro - Opening Screen</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            background-color: black;
+            background-image: url(./e877ff41b18e2c2be60b842d9d5fe2c8.gif); /* Replace with your space background image */
+            background-size: 100%;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+            color: white;
+            border: none;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #openingScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #openingScreen h1 {
+            font-size: 64px;
+            margin-bottom: 40px;
+            color: #00ccff;
+            text-shadow: 2px 2px #003366;
+            font-family: Monospace;
+        }
+
+        .button {
+            padding: 15px 30px;
+            background-color: #00ccff;
+            color: black;
+            border: none;
+            border-radius: 100px;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .button:hover {
+            background-color: #0099cc;
+        }
+
+        #leaderboard, #scoreboard {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+
+        #leaderboard input[type="text"], #leaderboard input[type="number"] {
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 18px;
+            border: 1px solid #00ccff;
+            border-radius: 5px;
+        }
+
+        #leaderboard input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #00ccff;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        #scoreboardList {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        #scoreboardList li {
+            padding: 10px;
+            border-bottom: 1px solid #00ccff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .delete-button {
+            padding: 5px 10px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        #farooqProductions {
+          font-family: Arial;
+        }
+    </style>
+</head>
+<body>
+  <div id="farooqProductions">
+        <p>@FAROOQ_PRODUCTIONS</p>
+    </div>
+    <div id="openingScreen">
+        <h1>FLAPPY ASTRO!</h1>
+        <button id="playButton" class="button">Play</button>
+        <button id="leaderboardButton" class="button">Add your score</button>
+        <button id="scoreboardButton" class="button">Scoreboard</button>
+        <div id="leaderboard">
+            <input type="text" id="playerName" placeholder="Enter your name" required>
+            <input type="number" id="playerScore" placeholder="Enter your score" required>
+            <input type="submit" id="submitScoreButton" class="button" value="Submit Score">
+        </div>
+        <div id="scoreboard">
+            <ul id="scoreboardList"></ul>
+        </div>
+    </div>
+
+    <script>
+        const deletePassword = 'your-secure-password'; // Replace this with your actual password
+
+        document.getElementById("playButton").addEventListener("click", function() {
+            // Redirect to the game page or start the game
+            window.location.href = "index.html"; // Change "index.html" to the actual path of your game file
+        });
+
+        document.getElementById("leaderboardButton").addEventListener("click", function() {
+            toggleVisibility('leaderboard');
+        });
+
+        document.getElementById("submitScoreButton").addEventListener("click", function() {
+            var playerName = document.getElementById('playerName').value;
+            var playerScore = document.getElementById('playerScore').value;
+
+            if (playerName && playerScore) {
+                // Save the name and score to localStorage (or send to server)
+                var leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+                // Check if the name already exists
+                var existingEntry = leaderboard.find(entry => entry.name === playerName);
+                if (existingEntry) {
+                    existingEntry.score = playerScore; // Update the score if the name exists
+                } else {
+                    leaderboard.push({ name: playerName, score: playerScore }); // Add new entry
+                }
+
+                localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+                alert('Score submitted successfully!');
+            } else {
+                alert('Please enter both name and score.');
+            }
+        });
+
+        document.getElementById("scoreboardButton").addEventListener("click", function() {
+            toggleVisibility('scoreboard');
+            updateScoreboard();
+        });
+
+        function toggleVisibility(id) {
+            var element = document.getElementById(id);
+            if (element.style.display === 'none' || element.style.display === '') {
+                element.style.display = 'flex';
+            } else {
+                element.style.display = 'none';
+            }
+        }
+
+        function updateScoreboard() {
+            var scoreboardList = document.getElementById('scoreboardList');
+            scoreboardList.innerHTML = '';
+
+            var leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+            // Sort the leaderboard by score in descending order
+            leaderboard.sort(function(a, b) {
+                return b.score - a.score;
+            });
+
+            // Display the sorted leaderboard
+            leaderboard.forEach(function(entry, index) {
+                var listItem = document.createElement('li');
+                listItem.innerHTML = `${entry.name}: ${entry.score} <button class="delete-button" data-index="${index}">Delete</button>`;
+                scoreboardList.appendChild(listItem);
+            });
+
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-button').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var password = prompt('Enter the password to delete this score:');
+                    if (password === deletePassword) {
+                        var index = this.getAttribute('data-index');
+                        leaderboard.splice(index, 1); // Remove the entry from the leaderboard
+                        localStorage.setItem('leaderboard', JSON.stringify(leaderboard)); // Update localStorage
+                        updateScoreboard(); // Refresh the scoreboard
+                    } else {
+                        alert('Incorrect password. You are not authorized to delete this score.');
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
